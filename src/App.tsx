@@ -20,7 +20,7 @@ function App() {
       return response.json();
     }).then((data) => {
       const formattedUsers = data.slice(0, 5).map((user: User) => {
-        return {...user, purchases: Math.floor(Math.random()*20)}
+        return { ...user, purchases: Math.floor(Math.random() * 20) }
       })
       setUserList(() => [...formattedUsers]);
       setUsers(() => [...formattedUsers]);
@@ -33,7 +33,7 @@ function App() {
 
   const addUser = (name: string) => {
     if (!/^\s*$/.test(name)) {
-      let newUser = { id: userList.length + 1, name, purchases: Math.floor(Math.random()*20)}
+      let newUser = { id: userList.length + 1, name, purchases: Math.floor(Math.random() * 20) }
       setUsers((prev: any) => [...prev, newUser])
       setUserList((prev: any) => [...prev, newUser])
       setNewUser('')
@@ -41,7 +41,7 @@ function App() {
   }
 
   const searchUser = (name: string) => {
-    if(name === '') setUsers(() => [...userList])
+    if (name === '') setUsers(() => [...userList])
     if (!/^\s*$/.test(name)) {
       setNewUser('')
       const filteredUsers = userList.filter((user) => {
@@ -70,15 +70,15 @@ function App() {
 
   return (
     <div className="App">
-        <header className="Header">
-          <h1>Users</h1>
-        </header>
-      
+      <header className="Header">
+        <h1>Users</h1>
+      </header>
+
       <main className="Main">
         <section className="AddUser">
-          <input 
-            type="text" 
-            placeholder="Add user" 
+          <input
+            type="text"
+            placeholder="Add user"
             value={newUser}
             onChange={(e) => {
               setNewUser(e.target.value);
@@ -90,17 +90,17 @@ function App() {
         </section>
 
         <section className="UserList-Container">
-            <div className="UserList">
-              <div className='UserItem'>
-                <div>Name</div>
-                <div>Purchases</div>
-                <div>Action</div>
-              </div>
-              {listUsers()}
+          <div className="UserList">
+            <div className='UserItem'>
+              <div>Name</div>
+              <div>Purchases</div>
+              <div>Action</div>
             </div>
+            {listUsers()}
+          </div>
         </section>
       </main >
-    </div >
+    </div>
   );
 }
 

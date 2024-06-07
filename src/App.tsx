@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import './App.css';
 
@@ -56,11 +56,17 @@ function App() {
     setUserList((prev: any) => prev.filter((user: any) => user.id !== id))
   }
 
+  const sortUsers = () => {
+    const sorted = users.sort((a, b) => a.purchases - b.purchases)
+    setUsers(() => [...sorted])
+    setUserList(() => [...sorted])
+  }
+
   const listUsers = () => {
     return users.length > 0 ? users.map((user: any) => (
       <div data-testid="user-item" className="UserItem" key={user.id}>
         <div>{user.name}</div>
-        <div >{user.purchases}</div>
+        <div data-testid="user-purchases">{user.purchases}</div>
         <div>
           <button className='Delete' onClick={() => deleteUser(user.id)}>Delete</button>
         </div>
@@ -86,7 +92,7 @@ function App() {
           />
           <button className="Add" onClick={() => addUser(newUser)}>Add User</button>
           <button className="Search" onClick={() => searchUser(newUser)}>Search User</button>
-          <button className="Sort">Sort</button>
+          <button className="Sort" onClick={() => sortUsers()}>Sort</button>
         </section>
 
         <section className="UserList-Container">

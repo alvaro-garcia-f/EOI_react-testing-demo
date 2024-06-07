@@ -1,11 +1,49 @@
 /* eslint-disable import/first */
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import App from './App';
-
-jest.mock('./services/userService')
 import { getUsers } from './services/userService'
 
-(getUsers as any).mockImplementation(() => Promise.resolve([
+/* jest.mock('./services/userService', () => ({
+  getUsers: jest.fn().mockResolvedValue({
+    json: () => Promise.resolve([
+      { id: 1, name: "Alice" },
+      { id: 2, name: "Bob" },
+      { id: 3, name: "Charlie" },
+      { id: 4, name: "David" },
+      { id: 5, name: "Eve" },
+      { id: 6, name: "Frank" },
+      { id: 7, name: "Grace" },
+      { id: 8, name: "Hank" },
+      { id: 9, name: "Ivy" },
+      { id: 10, name: "Jack" },
+    ])
+  })
+}))  */
+
+/* global.fetch = jest.fn(() =>Promise.resolve({ json: () =>Promise.resolve([
+  { id: 1, name: "Alice" },
+  { id: 2, name: "Bob" },
+  { id: 3, name: "Charlie" },
+  { id: 4, name: "David" },
+  { id: 5, name: "Eve" },
+  { id: 6, name: "Frank" },
+  { id: 7, name: "Grace" },
+  { id: 8, name: "Hank" },
+  { id: 9, name: "Ivy" },
+  { id: 10, name: "Jack" },
+]), }) ) as jest.Mock; */
+
+// Mock de getUsers
+
+jest.mock('./services/userService', () => ({
+
+  getUsers: jest.fn(),
+
+}));
+
+
+
+/* (getUsers as any).mockImplementation(() => Promise.resolve([
   { id: 1, name: "Alice" },
   { id: 2, name: "Bob" },
   { id: 3, name: "Charlie" },
@@ -17,7 +55,28 @@ import { getUsers } from './services/userService'
   { id: 9, name: "Ivy" },
   { id: 10, name: "Jack" },
 ])
-)
+) */
+
+let mockUsers = [
+  { id: 1, name: "Alice" },
+  { id: 2, name: "Bob" },
+  { id: 3, name: "Charlie" },
+  { id: 4, name: "David" },
+  { id: 5, name: "Eve" },
+  { id: 6, name: "Frank" },
+  { id: 7, name: "Grace" },
+  { id: 8, name: "Hank" },
+  { id: 9, name: "Ivy" },
+  { id: 10, name: "Jack" },
+]
+beforeEach(() => {
+
+  (getUsers as jest.Mock).mockResolvedValue({
+
+    json: () => Promise.resolve(mockUsers),
+
+  });
+})
 
 test('renders users heading', () => {
   // Given
@@ -61,7 +120,6 @@ test('renders five first users', async () => {
 test('Add user to list', async () => {
   // Given
   render(<App />)
-  console.log(getUsers())
   // When
   const userInputElement = screen.getByPlaceholderText("Add user");
   const userButtonElement = screen.getByText("Add User");
@@ -100,7 +158,6 @@ test('User deletes', async () => {
   // Then
   expect(screen.getAllByTestId("user-item")).toHaveLength(userList.length - 1);
 })
-
 test('New user cannot be blank spaces', async () => {
   // Given / Arrange
   render(<App />)
@@ -120,17 +177,16 @@ test('New user cannot be blank spaces', async () => {
 test('Filter users when clicking in search button', async () => {
   // Given
   render(<App />)
-  let userList: Array<any> = []
   // When
   const userInputElement = screen.getByPlaceholderText("Add user");
   fireEvent.change(userInputElement, { target: { value: "Ervin" } });
   const searchButton = screen.getByText("Search User");
   await waitFor(() => {
-    userList = screen.getAllByTestId("user-item");
+    screen.getAllByTestId("user-item");
   })
   fireEvent.click(searchButton);
   // Then / Assert
-  expect(userList).toHaveLength(1);
+  expect(screen.getAllByTestId("user-item")).toHaveLength(1);
 })
 
 test('All users are shown when clicking in search button and input is empty', async () => {

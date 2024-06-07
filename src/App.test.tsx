@@ -1,8 +1,23 @@
-import React from 'react';
+/* eslint-disable import/first */
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import App from './App';
-import { act } from 'react-dom/test-utils';
-import { getUsers } from './services/userService';
+
+jest.mock('./services/userService')
+import { getUsers } from './services/userService'
+
+(getUsers as any).mockImplementation(() => Promise.resolve([
+  { id: 1, name: "Alice" },
+  { id: 2, name: "Bob" },
+  { id: 3, name: "Charlie" },
+  { id: 4, name: "David" },
+  { id: 5, name: "Eve" },
+  { id: 6, name: "Frank" },
+  { id: 7, name: "Grace" },
+  { id: 8, name: "Hank" },
+  { id: 9, name: "Ivy" },
+  { id: 10, name: "Jack" },
+])
+)
 
 test('renders users heading', () => {
   // Given
@@ -46,10 +61,11 @@ test('renders five first users', async () => {
 test('Add user to list', async () => {
   // Given
   render(<App />)
+  console.log(getUsers())
   // When
   const userInputElement = screen.getByPlaceholderText("Add user");
   const userButtonElement = screen.getByText("Add User");
-  fireEvent.change(userInputElement, {target: {value: "Patata"}})
+  fireEvent.change(userInputElement, { target: { value: "Patata" } })
   fireEvent.click(userButtonElement)
   // Then
   expect(screen.getByText(/Patata/)).toBeInTheDocument();
@@ -64,7 +80,7 @@ test('New user cannot be empty', async () => {
   const userButtonElement = screen.getByText("Add User");
   await waitFor(() => {
     userList = screen.getAllByTestId("user-item");
-  }) 
+  })
   fireEvent.click(userButtonElement);
   // Then
   expect(screen.getAllByTestId("user-item")).toHaveLength(userList.length);
@@ -84,18 +100,17 @@ test('User deletes', async () => {
   // Then
   expect(screen.getAllByTestId("user-item")).toHaveLength(userList.length - 1);
 })
-    
 test('New user cannot be blank spaces', async () => {
   // Given / Arrange
   render(<App />)
   let userList = []
   // When / Act
   const userInputElement = screen.getByPlaceholderText("Add user");
-  fireEvent.change(userInputElement, {target: {value: "    "}})
+  fireEvent.change(userInputElement, { target: { value: "    " } })
   const userButtonElement = screen.getByText("Add User");
   await waitFor(() => {
     userList = screen.getAllByTestId("user-item");
-  }) 
+  })
   fireEvent.click(userButtonElement)
   // Then / Assert
   expect(screen.getAllByTestId("user-item")).toHaveLength(userList.length);
@@ -104,17 +119,17 @@ test('New user cannot be blank spaces', async () => {
 test('Filter users when clicking in search button', async () => {
   // Given
   render(<App />)
-  let userList = []
+  let userList: Array<any> = []
   // When
   const userInputElement = screen.getByPlaceholderText("Add user");
-  fireEvent.change(userInputElement, {target: {value: "Ervin"}});
+  fireEvent.change(userInputElement, { target: { value: "Ervin" } });
   const searchButton = screen.getByText("Search User");
   await waitFor(() => {
     userList = screen.getAllByTestId("user-item");
   })
   fireEvent.click(searchButton);
   // Then / Assert
-  expect(screen.getAllByTestId("user-item")).toHaveLength(1);
+  expect(userList).toHaveLength(1);
 })
 
 test('All users are shown when clicking in search button and input is empty', async () => {
@@ -123,7 +138,7 @@ test('All users are shown when clicking in search button and input is empty', as
   let userList = []
   // When
   const userInputElement = screen.getByPlaceholderText("Add user");
-  fireEvent.change(userInputElement, {target: {value: ""}});
+  fireEvent.change(userInputElement, { target: { value: "" } });
   const searchButton = screen.getByText("Search User");
   await waitFor(() => {
     userList = screen.getAllByTestId("user-item");
@@ -138,14 +153,14 @@ test('User list resets when clicking in search button and input is empty', async
   render(<App />)
   let userList = []
   const userInputElement = screen.getByPlaceholderText("Add user");
-  fireEvent.change(userInputElement, {target: {value: "Ervin"}});
+  fireEvent.change(userInputElement, { target: { value: "Ervin" } });
   const searchButton = screen.getByText("Search User");
   await waitFor(() => {
     userList = screen.getAllByTestId("user-item");
   })
   fireEvent.click(searchButton);
   // When
-  fireEvent.change(userInputElement, {target: {value: ""}});
+  fireEvent.change(userInputElement, { target: { value: "" } });
   fireEvent.click(searchButton);
   // Then
   expect(screen.getAllByTestId("user-item")).toHaveLength(userList.length);
@@ -191,7 +206,13 @@ test('Users sort', async () => {
     userList = screen.getAllByTestId("user-item");
   })
   // Docu within -> https://medium.com/@AbbasPlusPlus/react-testing-library-the-power-of-within-and-getbyrole-586b6435c59c
-  console.log(within(userList[0]))
+
+  for (let i = 0; i < userList.length - 1; i++) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    let current: number = parseInt(within(userList[i]).getByTestId('user-purchases').textContent ?? '0')
+    let next: number = parseInt(within(userList[i + 1]).getByTestId('user-purchases').textContent ?? '0')
+    expect(current).toBeLessThanOrEqual(next)
+  }
   // Then
   expect(sortButton).toBeInTheDocument();
 })
